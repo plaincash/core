@@ -7,11 +7,14 @@ namespace PlainCash\Lib\Genesis;
 use BitWasp\Bitcoin\Block\Block;
 use BitWasp\Bitcoin\Block\BlockHeader;
 use BitWasp\Bitcoin\Block\MerkleRoot;
+use BitWasp\Bitcoin\Exceptions\InvalidHashLengthException;
+use BitWasp\Bitcoin\Exceptions\MerkleTreeEmpty;
 use BitWasp\Bitcoin\Math\Math;
 use BitWasp\Bitcoin\Script\Opcodes;
 use BitWasp\Bitcoin\Script\ScriptFactory;
 use BitWasp\Bitcoin\Transaction\Factory\TxBuilder;
 use BitWasp\Buffertools\Buffer;
+use Exception;
 
 /**
  * @param $version
@@ -21,9 +24,9 @@ use BitWasp\Buffertools\Buffer;
  * @param $bits
  * @param $nonce
  * @return Block
- * @throws \BitWasp\Bitcoin\Exceptions\InvalidHashLengthException
- * @throws \BitWasp\Bitcoin\Exceptions\MerkleTreeEmpty
- * @throws \Exception
+ * @throws InvalidHashLengthException
+ * @throws MerkleTreeEmpty
+ * @throws Exception
  */
 function getBlock($version, $prevBlockHash, $txCollection, $time, $bits, $nonce)
 {
@@ -50,9 +53,9 @@ function getBlock($version, $prevBlockHash, $txCollection, $time, $bits, $nonce)
  * @param $amount
  * @param $publicKey
  * @return Block
- * @throws \BitWasp\Bitcoin\Exceptions\InvalidHashLengthException
- * @throws \BitWasp\Bitcoin\Exceptions\MerkleTreeEmpty
- * @throws \Exception
+ * @throws InvalidHashLengthException
+ * @throws MerkleTreeEmpty
+ * @throws Exception
  */
 function createGenesisBlock($timestamp, $time, $nonce, $bits, $version, $amount, $publicKey)
 {
@@ -94,10 +97,9 @@ function createGenesisBlock($timestamp, $time, $nonce, $bits, $version, $amount,
  * @param int $version
  * @param int $amount
  * @param string $publicKey
- * @return string
- * @throws \BitWasp\Bitcoin\Exceptions\InvalidHashLengthException
- * @throws \BitWasp\Bitcoin\Exceptions\MerkleTreeEmpty
- * @throws \ReflectionException
+ * @return Block|null
+ * @throws InvalidHashLengthException
+ * @throws MerkleTreeEmpty
  */
 function generate(string $pszTimestamp, int $time, int $bits, int $version, int $amount, string $publicKey)
 {
@@ -118,40 +120,8 @@ function generate(string $pszTimestamp, int $time, int $bits, int $version, int 
         if (substr($genesis->getHeader()->getHash()->getHex(), 0, 3) !== '000')
             continue;
 
-        return vsprintf(
-            <<<EOF
-            
-            INPUT:
-            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-            %s
-            
-            FOUND:
-            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-            nonce: %s
-            merkle root hex: %s
-            header hex: %s
-            header hash hex: %s
-            hex: %s
-            
-            EOF,
-            [
-                var_export(
-                    array_combine(
-                        array_column(
-                            (new \ReflectionFunction(__FUNCTION__))->getParameters(),
-                            'name'
-                        ),
-                        func_get_args()
-                    ),
-                    true
-                ),
-                $genesis->getHeader()->getNonce(),
-                $genesis->getMerkleRoot()->getHex(),
-                $genesis->getHeader()->getHex(),
-                $genesis->getHeader()->getHash()->getHex(),
-                $genesis->getHex(),
-            ]
-        );
-
+        break;
     }
+
+    return $genesis ?? null;
 }

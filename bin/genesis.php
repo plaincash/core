@@ -8,7 +8,15 @@ use function PlainCash\Lib\Genesis\generate;
 require __DIR__.'/../vendor/autoload.php';
 
 $parser = new Console_CommandLine();
-$parser->description = 'Generation of genesis block by given params.';
+$parser->description = <<<EOF
+Generation of genesis block by given params.
+
+Example:
+  ./bin/genesis.php \
+  -p "DummyNet 15/Aug/2020" \
+  -t 1597504370 \
+  -k "04f14ffe1017db891b93c601c2d3bf97dd8ae836e8eb209eb198f81fb74da493f0c2e6d5d3e2bc36ae6e68790e781f6c32397a15d28b1af58096a6513ad0cf3031"
+EOF;
 $parser->version = '0.0.1';
 $parser->addOption('pszTimestamp', array(
     'short_name'  => '-p',
@@ -89,7 +97,7 @@ try {
 
     $options = $resolver->resolve(array_filter($parser->parse()->options));
 
-    echo generate(
+    $genesis = generate(
         $options['pszTimestamp'],
         $options['time'],
         $options['bits'],
@@ -97,6 +105,32 @@ try {
         $options['amount'],
         $options['publicKey'],
     );
+
+    printf(
+        <<<EOF
+            
+        INPUT:
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        %s
+        
+        FOUND:
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        nonce: %s
+        merkle root hex: %s
+        header hex: %s
+        header hash hex: %s
+        hex: %s
+        
+        EOF,
+        var_export($options, true),
+        $genesis->getHeader()->getNonce(),
+        $genesis->getMerkleRoot()->getHex(),
+        $genesis->getHeader()->getHex(),
+        $genesis->getHeader()->getHash()->getHex(),
+        $genesis->getHex()
+    );
+
+
 
 } catch (Exception $exc) {
     $parser->displayError($exc->getMessage());
