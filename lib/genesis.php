@@ -88,29 +88,42 @@ function createGenesisBlock($timestamp, $time, $nonce, $bits, $version, $amount,
 }
 
 /**
+ * @param string $pszTimestamp
+ * @param int $time
+ * @param int $bits
+ * @param int $version
+ * @param int $amount
+ * @param string $publicKey
+ * @return string
  * @throws \BitWasp\Bitcoin\Exceptions\InvalidHashLengthException
  * @throws \BitWasp\Bitcoin\Exceptions\MerkleTreeEmpty
+ * @throws \ReflectionException
  */
-function generate()
+function generate(string $pszTimestamp, int $time, int $bits, int $version, int $amount, string $publicKey)
 {
     $nonce = 0 ;
     while (true){
 
         $genesis = createGenesisBlock(
-            "DummyNet 15/Aug/2020",
-            1597504370,
+            $pszTimestamp,
+            $time,
             ++$nonce,
-            0x1e0ffff0,
-            1,
-            5000000000, // 50 * COIN
-            "04f14ffe1017db891b93c601c2d3bf97dd8ae836e8eb209eb198f81fb74da493f0c2e6d5d3e2bc36ae6e68790e781f6c32397a15d28b1af58096a6513ad0cf3031"
+            $bits,
+            $version,
+            $amount,
+            $publicKey
         );
 
+        // TODO: do it right, according with difficulty (bits).
         if (substr($genesis->getHeader()->getHash()->getHex(), 0, 3) !== '000')
             continue;
 
         return vsprintf(
             <<<EOF
+            
+            INPUT:
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            %s
             
             FOUND:
             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -122,6 +135,16 @@ function generate()
             
             EOF,
             [
+                var_export(
+                    array_combine(
+                        array_column(
+                            (new \ReflectionFunction(__FUNCTION__))->getParameters(),
+                            'name'
+                        ),
+                        func_get_args()
+                    ),
+                    true
+                ),
                 $genesis->getHeader()->getNonce(),
                 $genesis->getMerkleRoot()->getHex(),
                 $genesis->getHeader()->getHex(),

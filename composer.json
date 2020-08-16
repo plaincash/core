@@ -7,11 +7,14 @@
         "ext-gmp": "*",
         "vlucas/phpdotenv": "^5.1",
         "bitwasp/bitcoin": "^1.0",
-        "phpunit/phpunit": "^9.3"
+        "phpunit/phpunit": "^9.3",
+        "pear/console_commandline": "^1.2",
+        "symfony/options-resolver": "^5.1"
     },
     "autoload": {
         "files": [
-            "functions.php"
+            "functions.php",
+            "php-boost.php"
         ]
     }
 }
