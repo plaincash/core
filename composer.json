@@ -5,6 +5,7 @@
     "license": "MIT",
     "require": {
         "ext-gmp": "*",
+        "ext-leveldb": "0.2.1",
         "vlucas/phpdotenv": "^5.1",
         "bitwasp/bitcoin": "^1.0",
         "phpunit/phpunit": "^9.3",
