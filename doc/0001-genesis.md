@@ -90,4 +90,4 @@ print l(0x00ffff / float(0x0404cb)) + (8*(0x1d - 3))*l(2) - (8*(0x1b - 3))*l(2)
 print l(0x00ffff / float(0x0404cb)) + (0x1d - 0x1b)*l(2**8)
 ```
 
-
+Source: https://en.bitcoin.it/wiki/Difficulty
